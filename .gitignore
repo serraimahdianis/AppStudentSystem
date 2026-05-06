@@ -1,0 +1,87 @@
+# Flutter/Dart
+*.dart.js
+*.dart.js_
+*.dart.js.map
+.dart_tool/
+.packages
+.pub/
+build/
+web/
+*.apk
+*.apks
+*.aab
+*.ipa
+*.app
+*.exe
+*.msi
+*.dll
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# Logs
+*.log
+logs/
+flutter_logs/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Test coverage
+coverage/
+*.lcov
+.all_test_results.json
+
+# Android
+/android/app/build/
+/android/build/
+/android/.gradle/
+/android/local.properties
+/android/*.iml
+/android/.idea/
+
+# iOS
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/App.framework/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/Generated.xcconfig
+/ios/Runner.xcworkspace/
+/ios/Runner.xcodeproj/project.xcworkspace/
+/ios/Runner.xcodeproj/xcuserdata/
+
+# Windows special device names (reserved names that cause issues)
+nul
+prn
+aux
+con
+clock$
+config$
+(com)[0-9]
+(lpt)[0-9]
+$、退
+[Windows Device Names]
+# Prevent adding these reserved Windows filenames
+[nul]
+[prn]
+[aux]
+[con]
+[clock$]
+[config$]
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iml
+
+# Flutter generated
+.flutter-plugins-dependencies
+.metadata
