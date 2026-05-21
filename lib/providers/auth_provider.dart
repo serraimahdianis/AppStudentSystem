@@ -18,6 +18,14 @@ class AuthProvider extends ChangeNotifier {
 
   final _api = ApiService();
 
+  AuthProvider() {
+    _api.onUnauthorized = () {
+      _isLoggedIn = false;
+      _student = null;
+      notifyListeners();
+    };
+  }
+
   Future<void> checkAuthStatus() async {
     _isLoading = true;
     notifyListeners();

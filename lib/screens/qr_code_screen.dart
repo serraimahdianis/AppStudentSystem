@@ -55,7 +55,7 @@ class QrCodeScreen extends StatelessWidget {
                   if (student?.group != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'Group: ${student!.group} • ${student.year}',
+                      'Group: ${student?.group ?? ''} • ${student?.year ?? ''}',
                       style: GoogleFonts.poppins(
                         color: Colors.white70,
                         fontSize: 12,

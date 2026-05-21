@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
 import '../models/models.dart';
 
+typedef UnauthorizedCallback = void Function();
+
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
@@ -15,6 +17,7 @@ class ApiService {
   final _storage = const FlutterSecureStorage();
   String? _token;
   String? _cachedStudentId;
+  UnauthorizedCallback? onUnauthorized;
 
   // ─── Token Management ──────────────────────────────────────────
 
@@ -117,6 +120,7 @@ class ApiService {
         // Handle 401 Unauthorized specifically
         if (response.statusCode == 401) {
           clearAuthData();
+          onUnauthorized?.call();
           throw Exception('Session expired. Please login again.');
         }
         
@@ -294,19 +298,25 @@ class ApiService {
   Future<Map<String, dynamic>> scanAttendance({
     required String sessionId,
     required String studentId,
+    String? nonce,
   }) async {
     final url = _buildUrl(AppConstants.attendanceScanEndpoint);
     debugPrint('Submitting Attendance Scan: $url');
 
+    final body = <String, dynamic>{
+      'sessionId': sessionId,
+      'studentId': studentId,
+      'scanTime': DateTime.now().toIso8601String(),
+      'status': 'present',
+    };
+    if (nonce != null && nonce.isNotEmpty) {
+      body['nonce'] = nonce;
+    }
+
     final response = await http.post(
       Uri.parse(url),
       headers: await _getHeaders(),
-      body: jsonEncode({
-        'sessionId': sessionId,
-        'studentId': studentId,
-        'status': 'present',
-        'scanTime': DateTime.now().toIso8601String(),
-      }),
+      body: jsonEncode(body),
     );
 
     final data = _handleResponse(response);

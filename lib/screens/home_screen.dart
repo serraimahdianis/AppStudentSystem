@@ -5,14 +5,15 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
-import '../providers/sessions_provider.dart';
 import '../providers/attendance_provider.dart';
+import 'main_nav_screen.dart';
 import '../models/models.dart';
 import '../utils/constants.dart';
 import '../widgets/common_widgets.dart';
 import 'qr_code_screen.dart';
 import 'notifications_screen.dart';
-import 'sessions_screen.dart';
+import 'scan_screen.dart';
+import '../services/socket/socket_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,13 +23,56 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _socketService = SocketService();
+  bool _hasActiveSession = false;
+  String _activeModuleName = '';
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DashboardProvider>().loadDashboard();
       context.read<AttendanceProvider>().loadHistory(silent: true);
+
+      final student = context.read<AuthProvider>().student;
+      if (student != null && student.group.isNotEmpty) {
+        _socketService.connect();
+        _socketService.joinGroup(student.group);
+      }
+
+      _socketService.onSessionStarted = ({
+        required String sessionId,
+        required String moduleId,
+        required String moduleName,
+        required String group,
+        required String startTime,
+      }) {
+        if (!mounted) return;
+        setState(() {
+          _hasActiveSession = true;
+          _activeModuleName = moduleName;
+        });
+      };
+
+      _socketService.onSessionEnded = (String sessionId) {
+        if (!mounted) return;
+        setState(() {
+          _hasActiveSession = false;
+          _activeModuleName = '';
+        });
+      };
     });
+  }
+
+  @override
+  void dispose() {
+    final student = context.read<AuthProvider>().student;
+    if (student != null && student.group.isNotEmpty) {
+      _socketService.leaveGroup(student.group);
+    }
+    _socketService.onSessionStarted = null;
+    _socketService.onSessionEnded = null;
+    super.dispose();
   }
 
   @override
@@ -126,6 +170,96 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+            // Active Session Banner
+            if (_hasActiveSession)
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF10B981), Color(0xFF059669)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981).withAlpha(51),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8, height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 4, height: 4,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF10B981),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Attendance session is active!',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                            Text(
+                              _activeModuleName,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withAlpha(204),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ScanScreen()),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(51),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Scan Now',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
             if (dashboard.isLoading && stats == null)
               const SliverFillRemaining(
@@ -322,7 +456,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       SectionHeader(
                         title: 'Recent History',
                         actionLabel: 'See All',
-                        onAction: () => DefaultTabController.of(context).animateTo(1),
+                        onAction: () {
+                          final nav = context.findAncestorStateOfType<MainNavScreenState>();
+                          nav?.switchToTab(1);
+                        },
                       ),
                       const SizedBox(height: 12),
                       Consumer<AttendanceProvider>(

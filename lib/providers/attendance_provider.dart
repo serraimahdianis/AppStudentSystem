@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 
 class AttendanceProvider extends ChangeNotifier {
   List<Attendance> _history = [];
+  List<Attendance> _fullHistory = [];
   bool _isLoading = false;
   String? _error;
   String? _selectedStatus;
@@ -12,6 +13,8 @@ class AttendanceProvider extends ChangeNotifier {
     if (_selectedStatus == null) return _history;
     return _history.where((a) => a.status == _selectedStatus).toList();
   }
+
+  List<Attendance> get fullHistory => _fullHistory;
   
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -69,6 +72,7 @@ class AttendanceProvider extends ChangeNotifier {
 
       // Sort by session date descending (newest first)
       _history.sort((a, b) => (b.session?.date ?? b.scanTime).compareTo(a.session?.date ?? a.scanTime));
+      _fullHistory = List.from(_history);
       
       _error = null;
     } catch (e) {
@@ -87,3 +91,4 @@ class AttendanceProvider extends ChangeNotifier {
 
   Future<void> refresh() => loadHistory(silent: true);
 }
+

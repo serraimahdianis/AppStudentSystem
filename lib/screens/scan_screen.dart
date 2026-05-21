@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -20,6 +22,18 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isProcessing = false;
   final ApiService _api = ApiService();
 
+  Map<String, dynamic>? _parseQrData(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map && decoded['sessionId'] != null) {
+        return decoded as Map<String, dynamic>;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   void _onDetect(BarcodeCapture capture) async {
     if (!_isScanning || _isProcessing) return;
 
@@ -38,9 +52,23 @@ class _ScanScreenState extends State<ScanScreen> {
       final studentId = context.read<AuthProvider>().student?.id;
       if (studentId == null) throw Exception('User not authenticated');
 
+      // Parse QR JSON to extract sessionId and nonce
+      final qrData = _parseQrData(code);
+      final String sessionId;
+      final String? nonce;
+
+      if (qrData != null) {
+        sessionId = qrData['sessionId']?.toString() ?? code;
+        nonce = qrData['nonce']?.toString();
+      } else {
+        sessionId = code;
+        nonce = null;
+      }
+
       await _api.scanAttendance(
-        sessionId: code, // Assuming QR contains Session ID
+        sessionId: sessionId,
         studentId: studentId,
+        nonce: nonce,
       );
       
       if (mounted) {

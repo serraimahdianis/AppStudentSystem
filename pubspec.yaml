@@ -43,6 +43,7 @@ dependencies:
   
   # Face recognition (biometric)
   local_auth: ^2.1.8
+  socket_io_client: ^3.0.0
 
   cupertino_icons: ^1.0.2
 

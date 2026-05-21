@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
                     radius: 44,
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Text(
-                      student?.fullName.substring(0, 1).toUpperCase() ?? 'S',
+                      (student?.fullName?.isNotEmpty == true ? student!.fullName[0].toUpperCase() : 'S'),
                       style: GoogleFonts.poppins(
                         fontSize: 36,
                         fontWeight: FontWeight.w700,

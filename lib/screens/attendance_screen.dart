@@ -27,6 +27,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final history = attendanceProvider.history;
     final isLoading = attendanceProvider.isLoading;
     final selectedStatus = attendanceProvider.selectedStatus;
+    final fullHistory = attendanceProvider.fullHistory;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,19 +37,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       body: Column(
         children: [
           // ─── Monthly Summary ───────────────────────
-          if (history.isNotEmpty)
+          if (fullHistory.isNotEmpty)
             Container(
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.8)
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4)),
                 ],
               ),
               child: Row(
@@ -56,17 +63,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 children: [
                   _SummaryItem(
                     label: 'Present',
-                    value: '${history.where((a) => a.isPresent).length}',
+                    value: '${fullHistory.where((a) => a.isPresent).length}',
                     icon: Icons.check_circle_outline,
                   ),
                   _SummaryItem(
                     label: 'Late',
-                    value: '${history.where((a) => a.isLate).length}',
+                    value: '${fullHistory.where((a) => a.isLate).length}',
                     icon: Icons.access_time,
                   ),
                   _SummaryItem(
                     label: 'Absent',
-                    value: '${history.where((a) => a.isAbsent).length}',
+                    value: '${fullHistory.where((a) => a.isAbsent).length}',
                     icon: Icons.cancel_outlined,
                   ),
                 ],
@@ -85,7 +92,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     hint: 'All Status',
                     items: const [
                       DropdownMenuItem(value: null, child: Text('All Status')),
-                      DropdownMenuItem(value: 'present', child: Text('Present')),
+                      DropdownMenuItem(
+                          value: 'present', child: Text('Present')),
                       DropdownMenuItem(value: 'absent', child: Text('Absent')),
                       DropdownMenuItem(value: 'late', child: Text('Late')),
                     ],
@@ -106,21 +114,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.history, size: 60, color: AppColors.textSecondary),
+                            const Icon(Icons.history,
+                                size: 60, color: AppColors.textSecondary),
                             const SizedBox(height: 12),
                             Text(
                               'No attendance records found',
-                              style: GoogleFonts.poppins(color: AppColors.textSecondary),
+                              style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary),
                             ),
                           ],
                         ),
                       )
                     : RefreshIndicator(
-                        onRefresh: () => context.read<AttendanceProvider>().refresh(),
+                        onRefresh: () =>
+                            context.read<AttendanceProvider>().refresh(),
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
                           itemCount: history.length,
-                          itemBuilder: (_, i) => AttendanceTile(attendance: history[i]),
+                          itemBuilder: (_, i) =>
+                              AttendanceTile(attendance: history[i]),
                         ),
                       ),
           ),
@@ -160,7 +172,8 @@ class _FilterDropdown extends StatelessWidget {
         isExpanded: true,
         underline: const SizedBox(),
         style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textPrimary),
-        icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+        icon: const Icon(Icons.keyboard_arrow_down,
+            color: AppColors.textSecondary),
       ),
     );
   }
