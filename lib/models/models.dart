@@ -87,6 +87,56 @@ class Module {
   }
 }
 
+// ─── Schedule Model ──────────────────────────────────────────────
+class Schedule {
+  final String id;
+  final String teacherId;
+  final String? teacherName;
+  final String moduleId;
+  final String? moduleName;
+  final String type; // cours | td | tp
+  final String year; // L1 | L2 | L3 | M1 | M2
+  final String? group;
+  final String dayOfWeek;
+  final String startTime;
+  final String endTime;
+  final String room;
+
+  Schedule({
+    required this.id,
+    required this.teacherId,
+    this.teacherName,
+    required this.moduleId,
+    this.moduleName,
+    required this.type,
+    required this.year,
+    this.group,
+    required this.dayOfWeek,
+    required this.startTime,
+    required this.endTime,
+    required this.room,
+  });
+
+  factory Schedule.fromJson(Map<String, dynamic> json) {
+    return Schedule(
+      id: json['_id']?.toString() ?? '',
+      teacherId: (json['teacherId'] is Map ? json['teacherId']['_id']?.toString() : json['teacherId']?.toString()) ?? '',
+      teacherName: json['teacherId'] is Map ? json['teacherId']['fullName']?.toString() : null,
+      moduleId: (json['moduleId'] is Map ? json['moduleId']['_id']?.toString() : json['moduleId']?.toString()) ?? '',
+      moduleName: json['moduleId'] is Map ? json['moduleId']['name']?.toString() : null,
+      type: json['type']?.toString() ?? 'cours',
+      year: json['year']?.toString() ?? '',
+      group: json['group']?.toString(),
+      dayOfWeek: json['dayOfWeek']?.toString() ?? '',
+      startTime: json['startTime']?.toString() ?? '',
+      endTime: json['endTime']?.toString() ?? '',
+      room: json['room']?.toString() ?? '',
+    );
+  }
+
+  String get typeLabel => type.toUpperCase();
+}
+
 // ─── Session Model ────────────────────────────────────────────────
 class Session {
   final String id;
@@ -100,6 +150,7 @@ class Session {
   final String endTime;
   final String type; // cours | td | tp
   final String group;
+  final String year; // Added for filtering
   final String status; // planned | active | closed
   final bool isReplacement;
   final String? reasonForReplacement;
@@ -117,6 +168,7 @@ class Session {
     required this.endTime,
     required this.type,
     required this.group,
+    required this.year,
     required this.status,
     required this.isReplacement,
     this.reasonForReplacement,
@@ -136,10 +188,19 @@ class Session {
       endTime: json['endTime']?.toString() ?? '',
       type: json['type']?.toString() ?? 'cours',
       group: json['group']?.toString() ?? '',
+      year: () {
+        if (json['year'] != null && json['year'].toString().isNotEmpty) return json['year'].toString();
+        if (json['moduleId'] is Map) return json['moduleId']['year']?.toString() ?? '';
+        return '';
+      }(),
       status: json['status']?.toString() ?? 'planned',
       isReplacement: json['isReplacement'] is bool ? json['isReplacement'] : false,
       reasonForReplacement: json['reasonForReplacement'] is Map ? null : json['reasonForReplacement']?.toString(),
-      room: json['room'] is Map ? null : json['room']?.toString(),
+      room: () {
+        if (json['room'] != null && json['room'].toString().isNotEmpty) return json['room'].toString();
+        if (json['scheduleId'] is Map) return json['scheduleId']['room']?.toString();
+        return null;
+      }(),
     );
   }
 
@@ -150,9 +211,11 @@ class Session {
   String get typeLabel => type.toUpperCase();
   
   String get formattedDate {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    String dayName = days[date.weekday - 1];
+    return '$dayName, ${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }
 

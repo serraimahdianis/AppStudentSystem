@@ -1,8 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/attendance_provider.dart';
@@ -12,7 +14,6 @@ import '../utils/constants.dart';
 import '../widgets/common_widgets.dart';
 import 'qr_code_screen.dart';
 import 'notifications_screen.dart';
-import 'scan_screen.dart';
 import '../services/socket/socket_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -61,6 +62,21 @@ class _HomeScreenState extends State<HomeScreen> {
           _activeModuleName = '';
         });
       };
+
+      _socketService.onFraudAlert = ({
+        required String sessionId,
+        required String reason,
+        required double riskScore,
+      }) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fraud alert: $reason'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      };
     });
   }
 
@@ -72,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     _socketService.onSessionStarted = null;
     _socketService.onSessionEnded = null;
+    _socketService.onFraudAlert = null;
     super.dispose();
   }
 
@@ -96,16 +113,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   right: 20,
                   bottom: 24,
                 ),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF3730A3), Color(0xFF4F46E5)],
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(28),
-                    bottomRight: Radius.circular(28),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
                   ),
+                  boxShadow: [
+                    BoxShadow(color: AppColors.primary.withAlpha(80), blurRadius: 20, offset: const Offset(0, 10)),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -237,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ScanScreen()),
+                            MaterialPageRoute(builder: (_) => const QrCodeScreen()),
                           );
                         },
                         child: Container(
@@ -247,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            'Scan Now',
+                            'Show QR',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -295,57 +315,64 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [
-                        BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: Offset(0, 5)),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        CircularPercentIndicator(
-                          radius: 50.0,
-                          lineWidth: 10.0,
-                          percent: (stats?.attendanceRate ?? 0) / 100,
-                          center: Text(
-                            "${(stats?.attendanceRate ?? 0).toInt()}%",
-                            style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 18),
-                          ),
-                          progressColor: AppColors.primary,
-                          backgroundColor: AppColors.background,
-                          circularStrokeCap: CircularStrokeCap.round,
-                          animation: true,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(220),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: Colors.white, width: 2),
+                          boxShadow: const [
+                            BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: Offset(0, 5)),
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Attendance Rate',
-                                style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
+                        child: Row(
+                          children: [
+                            CircularPercentIndicator(
+                              radius: 50.0,
+                              lineWidth: 10.0,
+                              percent: (stats?.attendanceRate ?? 0) / 100,
+                              center: Text(
+                                "${(stats?.attendanceRate ?? 0).toInt()}%",
+                                style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 18),
                               ),
-                              Text(
-                                '${stats?.totalSessions ?? 0} Total Sessions',
-                                style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
+                              progressColor: AppColors.primary,
+                              backgroundColor: AppColors.background,
+                              circularStrokeCap: CircularStrokeCap.round,
+                              animation: true,
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _miniStat(Icons.check_circle, AppColors.success, '${stats?.totalPresent ?? 0}'),
-                                  const SizedBox(width: 12),
-                                  _miniStat(Icons.cancel, AppColors.error, '${stats?.totalAbsent ?? 0}'),
+                                  Text(
+                                    'Attendance Rate',
+                                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
+                                  ),
+                                  Text(
+                                    '${stats?.totalSessions ?? 0} Total Sessions',
+                                    style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      _miniStat(Icons.check_circle, AppColors.success, '${stats?.totalPresent ?? 0} Present'),
+                                      const SizedBox(width: 12),
+                                      _miniStat(Icons.cancel, AppColors.error, '${stats?.totalAbsent ?? 0} Absent'),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ).animate().fade(duration: 400.ms).slideY(begin: 0.1, duration: 400.ms, curve: Curves.easeOutQuad),
                 ),
               ),
 

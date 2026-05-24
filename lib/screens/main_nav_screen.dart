@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 import 'home_screen.dart';
 import 'attendance_screen.dart';
-import 'sessions_screen.dart';
+import 'schedules_screen.dart';
 import 'profile_screen.dart';
-import 'scan_screen.dart';
+import 'qr_code_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
@@ -24,7 +24,7 @@ class MainNavScreenState extends State<MainNavScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     AttendanceScreen(),
-    SessionsScreen(),
+    SchedulesScreen(),
     ProfileScreen(),
   ];
 
@@ -38,12 +38,12 @@ class MainNavScreenState extends State<MainNavScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const ScanScreen()),
+          MaterialPageRoute(builder: (_) => const QrCodeScreen()),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
-        child: const Icon(Icons.qr_code_scanner_rounded, size: 28),
+        child: const Icon(Icons.qr_code_2, size: 28),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
@@ -81,7 +81,7 @@ class MainNavScreenState extends State<MainNavScreen> {
                 _NavItem(
                   icon: Icons.calendar_month_outlined,
                   activeIcon: Icons.calendar_month,
-                  label: 'Sessions',
+                  label: 'Schedule',
                   isActive: _currentIndex == 2,
                   onTap: () => setState(() => _currentIndex = 2),
                 ),

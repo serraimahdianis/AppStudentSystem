@@ -103,6 +103,7 @@ class AppConstants {
   static const String profileEndpoint = '/students';
   static const String attendanceEndpoint = '/attendance/student';
   static const String sessionsEndpoint = '/sessions';
+  static const String schedulesEndpoint = '/schedules';
   static const String sessionByIdEndpoint = '/sessions';
   static const String attendanceScanEndpoint = '/attendance/scan';
   static const String attendanceStatsEndpoint = '/attendance/stats';

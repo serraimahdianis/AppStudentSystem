@@ -1,6 +1,7 @@
-import 'package:socket_io_client/socket_io_client.dart';
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../services/api_service.dart';
 
 typedef SessionStartedCallback = void Function({
@@ -12,18 +13,26 @@ typedef SessionStartedCallback = void Function({
 });
 
 typedef SessionEndedCallback = void Function(String sessionId);
+typedef FraudAlertCallback = void Function({
+  required String sessionId,
+  required String reason,
+  required double riskScore,
+});
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
   factory SocketService() => _instance;
   SocketService._internal();
 
-  Socket? _socket;
+  WebSocketChannel? _channel;
+  StreamSubscription? _subscription;
   bool _isConnected = false;
   bool _connecting = false;
+  Timer? _reconnectTimer;
 
   SessionStartedCallback? onSessionStarted;
   SessionEndedCallback? onSessionEnded;
+  FraudAlertCallback? onFraudAlert;
 
   Future<void> connect() async {
     if (_connecting || _isConnected) return;
@@ -31,66 +40,92 @@ class SocketService {
     _connecting = true;
 
     final token = await ApiService().token ?? '';
-    final uri = 'http://localhost:3000?token=$token';
+    final uri = Uri.parse('ws://localhost:3000?token=$token');
 
-    _socket = io(
-        uri,
-        OptionBuilder()
-            .setTransports(['websocket'])
-            .enableAutoConnect()
-            .build());
-
-    _socket!.onConnect((_) {
+    try {
+      _channel = WebSocketChannel.connect(uri);
       _isConnected = true;
       _connecting = false;
-    });
 
-    _socket!.onDisconnect((_) {
+      _subscription = _channel!.stream.listen(
+        (data) {
+          try {
+            final msg = jsonDecode(data as String) as Map<String, dynamic>;
+            _handleEvent(msg['event'] as String?, msg['data']);
+          } catch (_) {}
+        },
+        onDone: () {
+          _isConnected = false;
+          _connecting = false;
+          _scheduleReconnect();
+        },
+        onError: (_) {
+          _isConnected = false;
+          _connecting = false;
+          _scheduleReconnect();
+        },
+      );
+    } catch (_) {
       _isConnected = false;
       _connecting = false;
-    });
+      _scheduleReconnect();
+    }
+  }
 
-    _socket!.onConnectError((data) {
-      _connecting = false;
-    });
+  void _handleEvent(String? event, dynamic data) {
+    if (event == null || data is! Map) return;
 
-    _socket!.on('session:started', (data) {
-      if (onSessionStarted != null && data is Map) {
-        onSessionStarted!(
+    switch (event) {
+      case 'session:started':
+        onSessionStarted?.call(
           sessionId: data['sessionId'] ?? '',
           moduleId: data['moduleId'] ?? '',
           moduleName: data['moduleName'] ?? '',
           group: data['group'] ?? '',
           startTime: data['startTime'] ?? '',
         );
-      }
-    });
+        break;
+      case 'session:ended':
+        onSessionEnded?.call(data['sessionId'] ?? '');
+        break;
+      case 'attendance:fraud-alert':
+        debugPrint('[WS] Fraud alert for session ${data['sessionId']}: ${data['reason']}');
+        onFraudAlert?.call(
+          sessionId: data['sessionId'] ?? '',
+          reason: data['reason'] ?? '',
+          riskScore: (data['riskScore'] ?? 0).toDouble(),
+        );
+        break;
+    }
+  }
 
-    _socket!.on('session:ended', (data) {
-      if (onSessionEnded != null && data is Map) {
-        onSessionEnded!(data['sessionId'] ?? '');
-      }
-    });
-
-    _socket!.on('attendance:fraud-alert', (data) {
-      if (data is Map) {
-        debugPrint(
-            '[SocketIO] Fraud alert for session ${data['sessionId']}: ${data['reason']}');
-      }
+  void _scheduleReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(const Duration(seconds: 3), () {
+      _connecting = false;
+      connect();
     });
   }
 
   void joinGroup(String group) {
-    _socket?.emit('join:group', group);
+    _send('join:group', group);
   }
 
   void leaveGroup(String group) {
-    _socket?.emit('leave:group', group);
+    _send('leave:group', group);
+  }
+
+  void _send(String event, dynamic data) {
+    if (_channel != null) {
+      _channel!.sink.add(jsonEncode({'event': event, 'data': data}));
+    }
   }
 
   void disconnect() {
-    _socket?.disconnect();
-    _socket = null;
+    _reconnectTimer?.cancel();
+    _subscription?.cancel();
+    _channel?.sink.close();
+    _channel = null;
     _isConnected = false;
     _connecting = false;
   }

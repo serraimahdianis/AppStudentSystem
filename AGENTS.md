@@ -5,7 +5,7 @@ Comprehensive guidelines for agentic coding agents contributing to the Smart Att
 - **Type**: Cross-platform Flutter mobile application (Android/iOS) for student attendance tracking
 - **Dart SDK**: >=3.0.0 <4.0.0 (null safety enabled by default)
 - **State Management**: `provider` package using `ChangeNotifier` pattern for reactive state updates
-- **Backend**: NestJS API running at `http://localhost:3000` (Swagger documentation available at `http://localhost:3000/api`)
+- **Backend**: NestJS API running at `http://localhost:3000` (root, no `/api` prefix — Swagger UI at `http://localhost:3000/api`)
 - **Key Features**:
   - Student login with JWT authentication
   - Attendance tracking via QR code scanning or manual check-in
@@ -128,7 +128,7 @@ Imports must be grouped in the following order, with exactly one blank line betw
 
 ### API Integration
 - **Base Configuration**: All API settings in `lib/utils/constants.dart` (`AppConstants` class)
-- **Base URL**: Default is `http://192.168.1.100:3000/api` → update to `http://localhost:3000/api` for local development (backend runs at `http://localhost:3000`, Swagger docs at `http://localhost:3000/api`)
+- **Base URL**: Default is `http://192.168.1.100:3000` → update to `http://localhost:3000` for local development (backend has NO `/api` prefix; Swagger UI at `http://localhost:3000/api`)
 - **Verified Endpoints** (mapped from running NestJS backend logs):
   | Endpoint Constant | Method | Path | Purpose |
   |-------------------|--------|------|---------|

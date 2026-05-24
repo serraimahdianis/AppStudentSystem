@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 
@@ -28,11 +29,18 @@ class QrCodeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF4F46E5), Color(0xFF818CF8)],
+                  colors: [AppColors.primary, AppColors.primaryDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withAlpha(80),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  )
+                ]
               ),
               child: Column(
                 children: [
@@ -64,7 +72,7 @@ class QrCodeScreen extends StatelessWidget {
                   ],
                 ],
               ),
-            ),
+            ).animate().fade(duration: 400.ms).slideY(begin: -0.1, curve: Curves.easeOutQuad),
             const SizedBox(height: 32),
             // ─── QR Code ──────────────────────────────────
             () {
@@ -74,41 +82,53 @@ class QrCodeScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.primary.withAlpha(50), width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppColors.primary.withAlpha(40),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
                     children: [
-                      QrImageView(
-                        data: qrCode,
-                        size: 200,
-                        backgroundColor: Colors.white,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: QrImageView(
+                          data: qrCode,
+                          size: 220,
+                          backgroundColor: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Scan this code to mark attendance',
+                        'Show this code to mark attendance',
                         style: GoogleFonts.poppins(
                           color: AppColors.textSecondary,
                           fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         qrCode,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          color: AppColors.textSecondary.withAlpha(150),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                );
+                ).animate(delay: 200.ms).fade(duration: 500.ms).scaleXY(begin: 0.9, curve: Curves.easeOutBack);
               } else {
                 return Container(
                   padding: const EdgeInsets.all(40),

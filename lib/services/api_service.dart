@@ -242,8 +242,14 @@ class ApiService {
     final data = _handleResponse(response);
     
     List list;
-    if (data is Map && data.containsKey('attendances')) {
-      list = data['attendances'] as List;
+    if (data is Map) {
+      if (data.containsKey('data')) {
+        list = data['data'] as List;
+      } else if (data.containsKey('attendances')) {
+        list = data['attendances'] as List;
+      } else {
+        list = [];
+      }
     } else if (data is List) {
       list = data;
     } else {
@@ -251,6 +257,33 @@ class ApiService {
     }
     
     return list.map((e) => Attendance.fromJson(e)).toList();
+  }
+
+  // ─── Schedules ───────────────────────────────────────────────
+
+  Future<List<Schedule>> getAllSchedules() async {
+    final uri = Uri.parse(_buildUrl(AppConstants.schedulesEndpoint));
+    debugPrint('Fetching Schedules: $uri');
+
+    final response = await http.get(uri, headers: await _getHeaders());
+    final data = _handleResponse(response);
+    
+    List list;
+    if (data is Map) {
+      if (data.containsKey('data')) {
+        list = data['data'] as List;
+      } else if (data.containsKey('schedules')) {
+        list = data['schedules'] as List;
+      } else {
+        list = [];
+      }
+    } else if (data is List) {
+      list = data;
+    } else {
+      list = [];
+    }
+    
+    return list.map((e) => Schedule.fromJson(e)).toList();
   }
 
   // ─── Sessions ────────────────────────────────────────────────
@@ -269,8 +302,14 @@ class ApiService {
     final data = _handleResponse(response);
     
     List list;
-    if (data is Map && data.containsKey('sessions')) {
-      list = data['sessions'] as List;
+    if (data is Map) {
+      if (data.containsKey('data')) {
+        list = data['data'] as List;
+      } else if (data.containsKey('sessions')) {
+        list = data['sessions'] as List;
+      } else {
+        list = [];
+      }
     } else if (data is List) {
       list = data;
     } else {

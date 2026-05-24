@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/attendance_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/common_widgets.dart';
@@ -40,45 +42,53 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           if (fullHistory.isNotEmpty)
             Container(
               margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primary.withValues(alpha: 0.8)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primaryDark,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5)),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _SummaryItem(
+                          label: 'Present',
+                          value: '${fullHistory.where((a) => a.isPresent).length}',
+                          icon: Icons.check_circle_outline,
+                        ),
+                        _SummaryItem(
+                          label: 'Late',
+                          value: '${fullHistory.where((a) => a.isLate).length}',
+                          icon: Icons.access_time,
+                        ),
+                        _SummaryItem(
+                          label: 'Absent',
+                          value: '${fullHistory.where((a) => a.isAbsent).length}',
+                          icon: Icons.cancel_outlined,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4)),
-                ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _SummaryItem(
-                    label: 'Present',
-                    value: '${fullHistory.where((a) => a.isPresent).length}',
-                    icon: Icons.check_circle_outline,
-                  ),
-                  _SummaryItem(
-                    label: 'Late',
-                    value: '${fullHistory.where((a) => a.isLate).length}',
-                    icon: Icons.access_time,
-                  ),
-                  _SummaryItem(
-                    label: 'Absent',
-                    value: '${fullHistory.where((a) => a.isAbsent).length}',
-                    icon: Icons.cancel_outlined,
-                  ),
-                ],
-              ),
-            ),
+            ).animate().fade(duration: 400.ms).slideY(begin: 0.1, curve: Curves.easeOutQuad),
 
           // ─── Filters ────────────────────────────────
           Container(
@@ -132,7 +142,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           padding: const EdgeInsets.all(16),
                           itemCount: history.length,
                           itemBuilder: (_, i) =>
-                              AttendanceTile(attendance: history[i]),
+                              AttendanceTile(attendance: history[i])
+                                  .animate().fade(duration: 300.ms, delay: (i * 50).ms)
+                                  .slideY(begin: 0.1, curve: Curves.easeOutQuad),
                         ),
                       ),
           ),
