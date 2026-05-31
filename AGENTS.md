@@ -1,4 +1,7 @@
-# AGENTS.md
+# AGENTS.md — AppStudentSystem/
+
+Root: `../AGENTS.md` for monorepo-wide commands and cross-project context.
+
 Comprehensive guidelines for agentic coding agents contributing to the Smart Attendance Student Flutter application. This file ensures consistent development practices across automated and human contributors.
 
 ## Project Overview

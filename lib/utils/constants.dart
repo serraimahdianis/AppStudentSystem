@@ -95,8 +95,8 @@ class AppTheme {
 }
 
 class AppConstants {
-  // Backend URL - NestJS at root
-  static const String baseUrl = 'http://localhost:3000';
+  // Production backend URL (sslip.io resolves to your server IP)
+  static const String baseUrl = 'http://oo0kccg00sgo80oo804og4gw.89.117.53.152.sslip.io';
 
   // Verified Endpoints
   static const String loginEndpoint = '/auth/student/login';
