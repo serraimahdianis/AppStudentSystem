@@ -97,6 +97,7 @@ class Schedule {
   final String type; // cours | td | tp
   final String year; // L1 | L2 | L3 | M1 | M2
   final String? group;
+  final String? speciality;
   final String dayOfWeek;
   final String startTime;
   final String endTime;
@@ -111,6 +112,7 @@ class Schedule {
     required this.type,
     required this.year,
     this.group,
+    this.speciality,
     required this.dayOfWeek,
     required this.startTime,
     required this.endTime,
@@ -127,6 +129,7 @@ class Schedule {
       type: json['type']?.toString() ?? 'cours',
       year: json['year']?.toString() ?? '',
       group: json['group']?.toString(),
+      speciality: json['speciality']?.toString(),
       dayOfWeek: json['dayOfWeek']?.toString() ?? '',
       startTime: json['startTime']?.toString() ?? '',
       endTime: json['endTime']?.toString() ?? '',
@@ -150,6 +153,7 @@ class Session {
   final String endTime;
   final String type; // cours | td | tp
   final String group;
+  final String? speciality;
   final String year; // Added for filtering
   final String status; // planned | active | closed
   final bool isReplacement;
@@ -168,6 +172,7 @@ class Session {
     required this.endTime,
     required this.type,
     required this.group,
+    this.speciality,
     required this.year,
     required this.status,
     required this.isReplacement,
@@ -188,6 +193,7 @@ class Session {
       endTime: json['endTime']?.toString() ?? '',
       type: json['type']?.toString() ?? 'cours',
       group: json['group']?.toString() ?? '',
+      speciality: json['speciality']?.toString(),
       year: () {
         if (json['year'] != null && json['year'].toString().isNotEmpty) return json['year'].toString();
         if (json['moduleId'] is Map) return json['moduleId']['year']?.toString() ?? '';

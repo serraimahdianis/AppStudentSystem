@@ -95,7 +95,7 @@ class AppTheme {
 }
 
 class AppConstants {
-  // Production backend URL (sslip.io resolves to your server IP)
+  // Local development backend URL (Use 'http://10.0.2.2:3000' for Android Emulator)
   static const String baseUrl = 'http://oo0kccg00sgo80oo804og4gw.89.117.53.152.sslip.io';
 
   // Verified Endpoints

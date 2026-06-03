@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../services/api_service.dart';
+import '../../utils/constants.dart';
 
 typedef SessionStartedCallback = void Function({
   required String sessionId,
@@ -40,7 +41,8 @@ class SocketService {
     _connecting = true;
 
     final token = await ApiService().token ?? '';
-    final uri = Uri.parse('ws://localhost:3000?token=$token');
+    final wsUrl = AppConstants.baseUrl.replaceFirst('http', 'ws');
+    final uri = Uri.parse('$wsUrl?token=$token');
 
     try {
       _channel = WebSocketChannel.connect(uri);
