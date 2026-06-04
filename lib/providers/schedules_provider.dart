@@ -29,7 +29,9 @@ class SchedulesProvider extends ChangeNotifier {
       if (student != null) {
         _schedules = allSchedules.where((s) {
           bool matchYear = s.year == student.year;
-          bool matchGroup = (s.group == null || s.group!.isEmpty || s.group == student.group);
+          // Include schedules where group is null, empty, or "Whole Year" (general lectures)
+          bool matchGroup = (s.group == null || s.group!.isEmpty || 
+              s.group == 'Whole Year' || s.group == student.group);
           return matchYear && matchGroup;
         }).toList();
       } else {

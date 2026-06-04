@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             controller: _studentIdCtrl,
                             decoration: const InputDecoration(
                               labelText: 'Student ID',
-                              hintText: 'e.g. ST1001',
+                              hintText: 'e.g. 0001',
                               prefixIcon: Icon(Icons.badge_outlined, color: AppColors.primary),
                             ),
                             textInputAction: TextInputAction.next,
@@ -196,6 +196,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
                               labelText: 'Password',
+                              hintText: 'Your birthday (e.g. 13042004)',
                               prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -208,19 +209,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             onSubmitted: (_) => _login(),
                           ),
                           const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'Forgot access? Contact admin',
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.primary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ),
                           const SizedBox(height: 16),
                           SizedBox(
                             width: double.infinity,
