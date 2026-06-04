@@ -117,8 +117,10 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return data;
       } else {
-        // Handle 401 Unauthorized specifically
-        if (response.statusCode == 401) {
+        final isLogin = response.request?.url.path.contains('/login') ?? false;
+        
+        // Handle 401 Unauthorized specifically, but not for login requests
+        if (response.statusCode == 401 && !isLogin) {
           clearAuthData();
           onUnauthorized?.call();
           throw Exception('Session expired. Please login again.');
