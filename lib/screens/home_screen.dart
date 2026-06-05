@@ -391,9 +391,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: MediaQuery.sizeOf(context).width > 600 ? 4 : 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.3,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 1.1,
                           ),
                           itemCount: stats.moduleStats.length,
                           itemBuilder: (context, index) {
@@ -531,54 +531,82 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildModuleCard(ModuleAttendanceStats m) {
+    final bool isGood = m.attendanceRate >= 75;
+    final bool isWarn = m.attendanceRate >= 50 && m.attendanceRate < 75;
+    final Color statColor = isGood ? AppColors.success : (isWarn ? AppColors.warning : AppColors.error);
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 2)),
+        color: statColor.withAlpha(15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: statColor.withAlpha(40), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: statColor.withAlpha(20),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            m.module.name,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: m.attendanceRate / 100,
-                    backgroundColor: AppColors.background,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      m.attendanceRate >= 80 ? AppColors.success : (m.attendanceRate >= 50 ? AppColors.warning : AppColors.error),
-                    ),
-                    minHeight: 6,
+                child: Text(
+                  m.module.name,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w700, 
+                    fontSize: 14,
+                    color: AppColors.primaryDark,
+                    height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '${m.attendanceRate.toInt()}%',
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: m.attendanceRate >= 80 ? AppColors.success : (m.attendanceRate >= 50 ? AppColors.warning : AppColors.error),
-                ),
+              Icon(
+                isGood ? Icons.check_circle_outline : (isWarn ? Icons.error_outline : Icons.cancel_outlined),
+                color: statColor,
+                size: 18,
               ),
             ],
           ),
-          Text(
-            '${m.present} of ${m.totalSessions} sessions',
-            style: GoogleFonts.poppins(fontSize: 10, color: AppColors.textSecondary),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${m.attendanceRate.toInt()}%',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: statColor,
+                    ),
+                  ),
+                  Text(
+                    '${m.present}/${m.totalSessions}',
+                    style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: m.attendanceRate / 100,
+                  backgroundColor: Colors.white.withAlpha(150),
+                  valueColor: AlwaysStoppedAnimation<Color>(statColor),
+                  minHeight: 6,
+                ),
+              ),
+            ],
           ),
         ],
       ),

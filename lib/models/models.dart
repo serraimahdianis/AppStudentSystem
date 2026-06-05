@@ -281,8 +281,14 @@ class ModuleAttendanceStats {
 
   factory ModuleAttendanceStats.fromJson(Map<String, dynamic> json) {
     return ModuleAttendanceStats(
-      module: Module.fromJson(json['module']),
-      totalSessions: _toInt(json['totalSessions']),
+      module: Module(
+        id: json['moduleId']?.toString() ?? '',
+        name: json['moduleName']?.toString() ?? 'Unknown Module',
+        teacherId: '',
+        year: '',
+        createdAt: DateTime.now(),
+      ),
+      totalSessions: _toInt(json['total'] ?? json['totalSessions']),
       present: _toInt(json['present']),
       absent: _toInt(json['absent']),
       late: _toInt(json['late']),
