@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
@@ -408,70 +408,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Weekly Activity Chart
-              SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SectionHeader(title: 'Weekly activity'),
-                      const SizedBox(height: 16),
-                      Container(
-                        height: 180,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(color: AppColors.cardShadow, blurRadius: 10, offset: Offset(0, 4)),
-                          ],
-                        ),
-                        child: BarChart(
-                          BarChartData(
-                            alignment: BarChartAlignment.spaceAround,
-                            maxY: (stats != null && stats.weeklyData.isNotEmpty 
-                                ? stats.weeklyData.map((e) => _toInt(e['count'])).reduce((a, b) => a > b ? a : b).toDouble() 
-                                : 0) + 1,
-                            barTouchData: BarTouchData(enabled: false),
-                            titlesData: FlTitlesData(
-                              show: true,
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  getTitlesWidget: (value, meta) {
-                                    if (stats == null || value.toInt() >= stats.weeklyData.length) return const Text('');
-                                    return Text(
-                                      stats.weeklyData[value.toInt()]['day'].toString().substring(0, 3),
-                                      style: GoogleFonts.poppins(fontSize: 10, color: AppColors.textSecondary),
-                                    );
-                                  },
-                                ),
-                              ),
-                              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            ),
-                            gridData: const FlGridData(show: false),
-                            borderData: FlBorderData(show: false),
-                            barGroups: stats?.weeklyData.asMap().entries.map((e) => BarChartGroupData(
-                              x: e.key,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: _toInt(e.value['count']).toDouble(),
-                                  color: AppColors.primary,
-                                  width: 12,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ],
-                            )).toList() ?? [],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
               // Recent Activity Section
               SliverPadding(
@@ -612,12 +548,5 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  int _toInt(dynamic v) {
-    if (v == null) return 0;
-    if (v is int) return v;
-    if (v is double) return v.toInt();
-    if (v is String) return int.tryParse(v) ?? 0;
-    return 0;
-  }
 }
+
